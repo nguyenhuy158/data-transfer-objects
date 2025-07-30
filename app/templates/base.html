@@ -103,6 +103,29 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Utility function to clean up modal backdrops
+        function cleanupModals() {
+            // Remove any leftover backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+            document.body.style.overflow = '';
+        }
+        
+        // Add event listener to clean up when modals are hidden
+        document.addEventListener('hidden.bs.modal', function (event) {
+            setTimeout(cleanupModals, 100);
+        });
+        
+        // Clean up on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            cleanupModals();
+        });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

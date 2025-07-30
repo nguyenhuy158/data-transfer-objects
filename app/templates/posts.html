@@ -266,8 +266,17 @@ function togglePublishedFilter() {
 }
 
 function showCreateModal() {
+    // Clean up any existing backdrops first
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+    
     document.getElementById('createPostForm').reset();
-    new bootstrap.Modal(document.getElementById('createPostModal')).show();
+    const createModal = new bootstrap.Modal(document.getElementById('createPostModal'), {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+    });
+    createModal.show();
 }
 
 async function createPost() {
