@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý người dùng - DTO Demo{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-users"></i> Quản lý người dùng</h2>
+            <button class="btn btn-custom" onclick="showCreateModal()">
+                <i class="fas fa-plus"></i> Thêm người dùng
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div id="alert-container"></div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="usersTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Họ tên</th>
+                                <th>Trạng thái</th>
+                                <th>Số bài viết</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-plus"></i> Thêm người dùng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username *</label>
+                        <input type="text" class="form-control" id="username" required>
+                        <div class="form-text">Chỉ được sử dụng chữ cái, số và dấu gạch dưới</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mật khẩu *</label>
+                        <input type="password" class="form-control" id="password" required>
+                        <div class="form-text">Tối thiểu 6 ký tự</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">Họ tên *</label>
+                        <input type="text" class="form-control" id="full_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="date_of_birth" class="form-label">Ngày sinh</label>
+                        <input type="date" class="form-control" id="date_of_birth">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-custom" onclick="createUser()">Tạo người dùng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Chỉnh sửa người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="edit_user_id">
+                    <div class="mb-3">
+                        <label for="edit_full_name" class="form-label">Họ tên</label>
+                        <input type="text" class="form-control" id="edit_full_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_phone" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="edit_phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_date_of_birth" class="form-label">Ngày sinh</label>
+                        <input type="date" class="form-control" id="edit_date_of_birth">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="edit_is_active">
+                            <label class="form-check-label" for="edit_is_active">
+                                Tài khoản hoạt động
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-custom" onclick="updateUser()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal fade" id="userDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user"></i> Chi tiết người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userDetailContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let users = [];
+
+// Load users when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsers();
+});
+
+function showAlert(message, type = 'success') {
+    const alertContainer = document.getElementById('alert-container');
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show alert-custom" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    alertContainer.innerHTML = alertHtml;
+    
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = alertContainer.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+async function loadUsers() {
+    try {
+        const response = await axios.get('/api/users');
+        if (response.data.success) {
+            users = response.data.data;
+            renderUsersTable();
+        } else {
+            showAlert('Không thể tải danh sách người dùng', 'danger');
+        }
+    } catch (error) {
+        showAlert('Lỗi kết nối: ' + error.message, 'danger');
+    }
+}
+
+function renderUsersTable() {
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.innerHTML = '';
+    
+    users.forEach(user => {
+        const row = `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.username}</td>
+                <td>${user.full_name}</td>
+                <td>
+                    <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
+                        ${user.is_active ? 'Hoạt động' : 'Không hoạt động'}
+                    </span>
+                </td>
+                <td><span class="badge bg-info">${user.posts_count}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info me-1" onclick="viewUser(${user.id})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editUser(${user.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+function showCreateModal() {
+    document.getElementById('createUserForm').reset();
+    new bootstrap.Modal(document.getElementById('createUserModal')).show();
+}
+
+async function createUser() {
+    const formData = {
+        username: document.getElementById('username').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        full_name: document.getElementById('full_name').value,
+        phone: document.getElementById('phone').value || null,
+        date_of_birth: document.getElementById('date_of_birth').value || null
+    };
+    
+    try {
+        const response = await axios.post('/api/users', formData);
+        if (response.data.success) {
+            showAlert('Người dùng đã được tạo thành công!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+            loadUsers();
+        } else {
+            showAlert('Lỗi: ' + JSON.stringify(response.data.message), 'danger');
+        }
+    } catch (error) {
+        showAlert('Lỗi kết nối: ' + error.message, 'danger');
+    }
+}
+
+async function viewUser(userId) {
+    try {
+        const response = await axios.get(`/api/users/${userId}`);
+        if (response.data.success) {
+            const user = response.data.data;
+            const content = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>ID:</strong> ${user.id}</p>
+                        <p><strong>Username:</strong> ${user.username}</p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Họ tên:</strong> ${user.full_name}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Số điện thoại:</strong> ${user.phone || 'Chưa có'}</p>
+                        <p><strong>Ngày sinh:</strong> ${user.date_of_birth || 'Chưa có'}</p>
+                        <p><strong>Trạng thái:</strong> 
+                            <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
+                                ${user.is_active ? 'Hoạt động' : 'Không hoạt động'}
+                            </span>
+                        </p>
+                        <p><strong>Số bài viết:</strong> <span class="badge bg-info">${user.posts_count}</span></p>
+                        <p><strong>Ngày tạo:</strong> ${new Date(user.created_at).toLocaleString('vi-VN')}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('userDetailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+        }
+    } catch (error) {
+        showAlert('Lỗi khi tải thông tin người dùng: ' + error.message, 'danger');
+    }
+}
+
+async function editUser(userId) {
+    try {
+        const response = await axios.get(`/api/users/${userId}`);
+        if (response.data.success) {
+            const user = response.data.data;
+            document.getElementById('edit_user_id').value = user.id;
+            document.getElementById('edit_full_name').value = user.full_name;
+            document.getElementById('edit_phone').value = user.phone || '';
+            document.getElementById('edit_date_of_birth').value = user.date_of_birth || '';
+            document.getElementById('edit_is_active').checked = user.is_active;
+            
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+    } catch (error) {
+        showAlert('Lỗi khi tải thông tin người dùng: ' + error.message, 'danger');
+    }
+}
+
+async function updateUser() {
+    const userId = document.getElementById('edit_user_id').value;
+    const formData = {
+        full_name: document.getElementById('edit_full_name').value || null,
+        phone: document.getElementById('edit_phone').value || null,
+        date_of_birth: document.getElementById('edit_date_of_birth').value || null,
+        is_active: document.getElementById('edit_is_active').checked
+    };
+    
+    try {
+        const response = await axios.put(`/api/users/${userId}`, formData);
+        if (response.data.success) {
+            showAlert('Người dùng đã được cập nhật thành công!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+            loadUsers();
+        } else {
+            showAlert('Lỗi: ' + JSON.stringify(response.data.message), 'danger');
+        }
+    } catch (error) {
+        showAlert('Lỗi kết nối: ' + error.message, 'danger');
+    }
+}
+
+async function deleteUser(userId) {
+    if (confirm('Bạn có chắc chắn muốn xóa người dùng này? Tất cả bài viết của họ cũng sẽ bị xóa.')) {
+        try {
+            const response = await axios.delete(`/api/users/${userId}`);
+            if (response.data.success) {
+                showAlert('Người dùng đã được xóa thành công!', 'success');
+                loadUsers();
+            } else {
+                showAlert('Lỗi: ' + response.data.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Lỗi kết nối: ' + error.message, 'danger');
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - DTO Design Pattern Demo{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-rocket text-primary"></i>
+                DTO Design Pattern Demo
+            </h1>
+            <p class="lead">Ứng dụng web Python sử dụng Flask và SQLite với DTO Pattern</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-shield-alt fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">DTO Pattern Benefits</h5>
+                <p class="card-text">
+                    Data Transfer Objects giúp bảo vệ core entities, cung cấp validation
+                    và kiểm soát dữ liệu được truyền tải giữa các tầng của ứng dụng.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-database fa-3x text-info"></i>
+                </div>
+                <h5 class="card-title">SQLite Database</h5>
+                <p class="card-text">
+                    Sử dụng SQLite làm cơ sở dữ liệu với SQLAlchemy ORM,
+                    đảm bảo tính nhất quán và dễ dàng quản lý.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                <h5 class="card-title">Quản lý người dùng</h5>
+                <p class="card-text">Tạo, xem, cập nhật và xóa người dùng</p>
+                <a href="/users" class="btn btn-custom">
+                    <i class="fas fa-arrow-right"></i> Xem người dùng
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-blog fa-2x text-warning mb-3"></i>
+                <h5 class="card-title">Quản lý bài viết</h5>
+                <p class="card-text">Tạo, xem, cập nhật và xóa bài viết</p>
+                <a href="/posts" class="btn btn-custom">
+                    <i class="fas fa-arrow-right"></i> Xem bài viết
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-code fa-2x text-success mb-3"></i>
+                <h5 class="card-title">REST API</h5>
+                <p class="card-text">API endpoints với DTO validation</p>
+                <button class="btn btn-custom" onclick="showApiDocs()">
+                    <i class="fas fa-book"></i> API Docs
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Kiến trúc ứng dụng</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-globe fa-2x text-primary mb-2"></i>
+                            <h6>Web Interface</h6>
+                            <small>HTML + Bootstrap</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-exchange-alt fa-2x text-success mb-2"></i>
+                            <h6>DTO Layer</h6>
+                            <small>Marshmallow Validation</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
+                            <h6>Service Layer</h6>
+                            <small>Business Logic</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-database fa-2x text-info mb-2"></i>
+                            <h6>Data Layer</h6>
+                            <small>SQLAlchemy ORM</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- API Documentation Modal -->
+<div class="modal fade" id="apiModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-code"></i> API Endpoints</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Endpoint</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="badge bg-success">GET</td><td>/api/health</td><td>Health check</td></tr>
+                            <tr><td class="badge bg-primary">POST</td><td>/api/users</td><td>Create user</td></tr>
+                            <tr><td class="badge bg-success">GET</td><td>/api/users</td><td>Get all users</td></tr>
+                            <tr><td class="badge bg-success">GET</td><td>/api/users/{id}</td><td>Get user by ID</td></tr>
+                            <tr><td class="badge bg-warning">PUT</td><td>/api/users/{id}</td><td>Update user</td></tr>
+                            <tr><td class="badge bg-danger">DELETE</td><td>/api/users/{id}</td><td>Delete user</td></tr>
+                            <tr><td class="badge bg-primary">POST</td><td>/api/users/{id}/posts</td><td>Create post</td></tr>
+                            <tr><td class="badge bg-success">GET</td><td>/api/posts</td><td>Get all posts</td></tr>
+                            <tr><td class="badge bg-success">GET</td><td>/api/posts/{id}</td><td>Get post by ID</td></tr>
+                            <tr><td class="badge bg-warning">PUT</td><td>/api/posts/{id}/user/{uid}</td><td>Update post</td></tr>
+                            <tr><td class="badge bg-danger">DELETE</td><td>/api/posts/{id}/user/{uid}</td><td>Delete post</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showApiDocs() {
+    new bootstrap.Modal(document.getElementById('apiModal')).show();
+}
+</script>
+{% endblock %}

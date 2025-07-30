@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý bài viết - DTO Demo{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-blog"></i> Quản lý bài viết</h2>
+            <div>
+                <button class="btn btn-outline-secondary me-2" onclick="togglePublishedFilter()">
+                    <i class="fas fa-filter"></i> <span id="filterText">Tất cả bài viết</span>
+                </button>
+                <button class="btn btn-custom" onclick="showCreateModal()">
+                    <i class="fas fa-plus"></i> Thêm bài viết
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div id="alert-container"></div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="postsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Tiêu đề</th>
+                                <th>Tác giả</th>
+                                <th>Trạng thái</th>
+                                <th>Lượt xem</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Post Modal -->
+<div class="modal fade" id="createPostModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Thêm bài viết mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPostForm">
+                    <div class="mb-3">
+                        <label for="author_select" class="form-label">Tác giả *</label>
+                        <select class="form-control" id="author_select" required>
+                            <option value="">Chọn tác giả...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Tiêu đề *</label>
+                        <input type="text" class="form-control" id="title" required>
+                        <div class="form-text">Tối thiểu 5 ký tự</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="summary" class="form-label">Tóm tắt</label>
+                        <input type="text" class="form-control" id="summary">
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Nội dung *</label>
+                        <textarea class="form-control" id="content" rows="8" required></textarea>
+                        <div class="form-text">Tối thiểu 10 ký tự</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_published">
+                            <label class="form-check-label" for="is_published">
+                                Xuất bản ngay
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-custom" onclick="createPost()">Tạo bài viết</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Post Modal -->
+<div class="modal fade" id="editPostModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Chỉnh sửa bài viết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPostForm">
+                    <input type="hidden" id="edit_post_id">
+                    <input type="hidden" id="edit_author_id">
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label">Tiêu đề</label>
+                        <input type="text" class="form-control" id="edit_title">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_summary" class="form-label">Tóm tắt</label>
+                        <input type="text" class="form-control" id="edit_summary">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_content" class="form-label">Nội dung</label>
+                        <textarea class="form-control" id="edit_content" rows="8"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="edit_is_published">
+                            <label class="form-check-label" for="edit_is_published">
+                                Xuất bản
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-custom" onclick="updatePost()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Post Detail Modal -->
+<div class="modal fade" id="postDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-blog"></i> Chi tiết bài viết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="postDetailContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let posts = [];
+let users = [];
+let showPublishedOnly = false;
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsers();
+    loadPosts();
+});
+
+function showAlert(message, type = 'success') {
+    const alertContainer = document.getElementById('alert-container');
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show alert-custom" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    alertContainer.innerHTML = alertHtml;
+    
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = alertContainer.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+async function loadUsers() {
+    try {
+        const response = await axios.get('/api/users');
+        if (response.data.success) {
+            users = response.data.data.filter(user => user.is_active);
+            populateAuthorSelect();
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+    }
+}
+
+function populateAuthorSelect() {
+    const select = document.getElementById('author_select');
+    select.innerHTML = '<option value="">Chọn tác giả...</option>';
+    users.forEach(user => {
+        const option = `<option value="${user.id}">${user.full_name} (${user.username})</option>`;
+        select.innerHTML += option;
+    });
+}
+
+async function loadPosts() {
+    try {
+        const url = showPublishedOnly ? '/api/posts?published=true' : '/api/posts';
+        const response = await axios.get(url);
+        if (response.data.success) {
+            posts = response.data.data;
+            renderPostsTable();
+        } else {
+            showAlert('Không thể tải danh sách bài viết', 'danger');
+        }
+    } catch (error) {
+        showAlert('Lỗi kết nối: ' + error.message, 'danger');
+    }
+}
+
+function renderPostsTable() {
+    const tbody = document.querySelector('#postsTable tbody');
+    tbody.innerHTML = '';
+    
+    posts.forEach(post => {
+        const row = `
+            <tr>
+                <td>${post.id}</td>
+                <td>
+                    <div class="fw-bold">${post.title}</div>
+                    ${post.summary ? `<small class="text-muted">${post.summary}</small>` : ''}
+                </td>
+                <td>${post.author_name}</td>
+                <td>
+                    <span class="badge ${post.is_published ? 'bg-success' : 'bg-warning'}">
+                        ${post.is_published ? 'Đã xuất bản' : 'Bản nháp'}
+                    </span>
+                </td>
+                <td><span class="badge bg-info">${post.view_count}</span></td>
+                <td>${new Date(post.created_at).toLocaleDateString('vi-VN')}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info me-1" onclick="viewPost(${post.id})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning me-1" onclick="editPost(${post.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deletePost(${post.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+function togglePublishedFilter() {
+    showPublishedOnly = !showPublishedOnly;
+    const filterText = document.getElementById('filterText');
+    filterText.textContent = showPublishedOnly ? 'Chỉ bài đã xuất bản' : 'Tất cả bài viết';
+    loadPosts();
+}
+
+function showCreateModal() {
+    document.getElementById('createPostForm').reset();
+    new bootstrap.Modal(document.getElementById('createPostModal')).show();
+}
+
+async function createPost() {
+    const authorId = document.getElementById('author_select').value;
+    if (!authorId) {
+        showAlert('Vui lòng chọn tác giả', 'warning');
+        return;
+    }
+    
+    const formData = {
+        title: document.getElementById('title').value,
+        summary: document.getElementById('summary').value || null,
+        content: document.getElementById('content').value,
+        is_published: document.getElementById('is_published').checked
+    };
+    
+    try {
+        const response = await axios.post(`/api/users/${authorId}/posts`, formData);
+        if (response.data.success) {
+            showAlert('Bài viết đã được tạo thành công!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('createPostModal')).hide();
+            loadPosts();
+        } else {
+            showAlert('Lỗi: ' + JSON.stringify(response.data.message), 'danger');
+        }
+    } catch (error) {
+        showAlert('Lỗi kết nối: ' + error.message, 'danger');
+    }
+}
+
+async function viewPost(postId) {
+    try {
+        const response = await axios.get(`/api/posts/${postId}`);
+        if (response.data.success) {
+            const post = response.data.data;
+            const content = `
+                <div class="mb-3">
+                    <h4>${post.title}</h4>
+                    ${post.summary ? `<p class="text-muted">${post.summary}</p>` : ''}
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Tác giả:</strong> ${post.author.full_name}</p>
+                        <p><strong>Trạng thái:</strong> 
+                            <span class="badge ${post.is_published ? 'bg-success' : 'bg-warning'}">
+                                ${post.is_published ? 'Đã xuất bản' : 'Bản nháp'}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Lượt xem:</strong> <span class="badge bg-info">${post.view_count}</span></p>
+                        <p><strong>Ngày tạo:</strong> ${new Date(post.created_at).toLocaleString('vi-VN')}</p>
+                        <p><strong>Cập nhật:</strong> ${new Date(post.updated_at).toLocaleString('vi-VN')}</p>
+                    </div>
+                </div>
+                <div class="border-top pt-3">
+                    <h6>Nội dung:</h6>
+                    <div class="bg-light p-3 rounded">
+                        ${post.content.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('postDetailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('postDetailModal')).show();
+        }
+    } catch (error) {
+        showAlert('Lỗi khi tải thông tin bài viết: ' + error.message, 'danger');
+    }
+}
+
+async function editPost(postId) {
+    try {
+        const response = await axios.get(`/api/posts/${postId}`);
+        if (response.data.success) {
+            const post = response.data.data;
+            document.getElementById('edit_post_id').value = post.id;
+            document.getElementById('edit_author_id').value = post.author.id;
+            document.getElementById('edit_title').value = post.title;
+            document.getElementById('edit_summary').value = post.summary || '';
+            document.getElementById('edit_content').value = post.content;
+            document.getElementById('edit_is_published').checked = post.is_published;
+            
+            new bootstrap.Modal(document.getElementById('editPostModal')).show();
+        }
+    } catch (error) {
+        showAlert('Lỗi khi tải thông tin bài viết: ' + error.message, 'danger');
+    }
+}
+
+async function updatePost() {
+    const postId = document.getElementById('edit_post_id').value;
+    const authorId = document.getElementById('edit_author_id').value;
+    
+    const formData = {
+        title: document.getElementById('edit_title').value || null,
+        summary: document.getElementById('edit_summary').value || null,
+        content: document.getElementById('edit_content').value || null,
+        is_published: document.getElementById('edit_is_published').checked
+    };
+    
+    try {
+        const response = await axios.put(`/api/posts/${postId}/user/${authorId}`, formData);
+        if (response.data.success) {
+            showAlert('Bài viết đã được cập nhật thành công!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('editPostModal')).hide();
+            loadPosts();
+        } else {
+            showAlert('Lỗi: ' + JSON.stringify(response.data.message), 'danger');
+        }
+    } catch (error) {
+        showAlert('Lỗi kết nối: ' + error.message, 'danger');
+    }
+}
+
+async function deletePost(postId) {
+    if (confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
+        try {
+            // Find the post to get author ID
+            const post = posts.find(p => p.id === postId);
+            if (!post) {
+                showAlert('Không tìm thấy bài viết', 'danger');
+                return;
+            }
+            
+            // Find author ID
+            const author = users.find(u => u.full_name === post.author_name);
+            if (!author) {
+                showAlert('Không tìm thấy tác giả', 'danger');
+                return;
+            }
+            
+            const response = await axios.delete(`/api/posts/${postId}/user/${author.id}`);
+            if (response.data.success) {
+                showAlert('Bài viết đã được xóa thành công!', 'success');
+                loadPosts();
+            } else {
+                showAlert('Lỗi: ' + response.data.message, 'danger');
+            }
+        } catch (error) {
+            showAlert('Lỗi kết nối: ' + error.message, 'danger');
+        }
+    }
+}
+</script>
+{% endblock %}
